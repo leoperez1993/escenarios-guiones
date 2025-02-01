@@ -4,7 +4,7 @@ Herramienta para el manejo de guiones y datos referentes.
 
 ## Demo
 
-[Funcionamiento de la herramienta](../adminces/README/demo.webm)
+[Funcionamiento de la herramienta](README/demo.webm)
 
 ## Ejecución y construcción
 
