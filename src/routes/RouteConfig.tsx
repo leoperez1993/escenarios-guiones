@@ -43,5 +43,13 @@ export const routes = [
       dataApi.exportData(keyDataFunction, keyDataFunction);
     },
   },
+  {
+    label: "Exportar en texto plano",
+    icon: "pi pi-file-word mr-2",
+    command: () => {
+      dataApi.exportDataPlainText(keyDataScenario, keyDataScenario);
+      dataApi.exportDataPlainText(keyDataFunction, keyDataFunction);
+    },
+  },
   { url: "/", element: <Welcome /> },
 ];

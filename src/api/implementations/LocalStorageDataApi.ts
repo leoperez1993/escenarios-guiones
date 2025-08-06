@@ -12,14 +12,19 @@ export class LocalStorageDataApi implements IDataApi<string, Scenario | Auxiliar
     return uuid();
   }
 
-  private downloadData(data: object, filename: string): void {
+  private downloadData(data: object | string, filename: string, typeFile: "json" | "txt"): void {
+    const json = "application/json";
+    const txt = "text/plain";
+
+    console.log("Estoy en download:", data);
+
     if (data) {
       const jsonData = JSON.stringify(data, null, 2);
-      const blob = new Blob([jsonData], { type: "application/json" });
+      const blob = new Blob([typeFile === "json" ? jsonData : String(data)], { type: typeFile === "json" ? json : txt });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${filename}.json`;
+      a.download = `${filename}.${typeFile}`;
       a.click();
       URL.revokeObjectURL(url);
     } else {
@@ -38,6 +43,41 @@ export class LocalStorageDataApi implements IDataApi<string, Scenario | Auxiliar
       throw error;
     }
   }
+
+  private createTxtFile = (data: (Scenario | AuxiliaryFunction)[]): string => {
+    let fileContent = "";
+
+    const isFunctionArray = (data as AuxiliaryFunction[])[0]?.params !== undefined;
+
+    data.forEach((item, index) => {
+      fileContent += `Nombre: ${item.name || "Sin nombre"}\n`;
+      fileContent += `Descripción: ${item.description || "Sin descripción"}\n`;
+
+      if (isFunctionArray) {
+        const functionItem = item as AuxiliaryFunction;
+        if (functionItem.params && functionItem.params.length > 0) {
+          fileContent += `Parámetros: ${functionItem.params.join(", ")}\n`;
+        }
+      } else {
+        const scenarioItem = item as Scenario;
+        if (scenarioItem.precondition && scenarioItem.precondition.length > 0) {
+          fileContent += `Precondiciones: ${scenarioItem.precondition.join(", ")}\n`;
+        }
+      }
+
+      fileContent += "Pasos:\n";
+      item.steps.forEach((step) => {
+        fileContent += `  - Paso ${step.id}: ${step.step}\n`;
+        fileContent += `    Resultado: ${step.result}\n`;
+      });
+
+      if (index < data.length - 1) {
+        fileContent += "\n--------------------\n\n";
+      }
+    });
+
+    return fileContent;
+  };
 
   saveData(key: string, newData: Scenario | AuxiliaryFunction): void {
     try {
@@ -67,7 +107,18 @@ export class LocalStorageDataApi implements IDataApi<string, Scenario | Auxiliar
   exportData(key: string, filename: string): void {
     try {
       const data = this.getData(key);
-      this.downloadData(data, filename);
+      this.downloadData(data, filename, "json");
+    } catch (error) {
+      console.error("Error exportando datos de localStorage:", error);
+      throw error;
+    }
+  }
+
+  exportDataPlainText(key: string, filename: string): void {
+    try {
+      const data = this.getData(key);
+      const fileContent = this.createTxtFile(data);
+      this.downloadData(fileContent, filename, "txt");
     } catch (error) {
       console.error("Error exportando datos de localStorage:", error);
       throw error;
@@ -76,7 +127,7 @@ export class LocalStorageDataApi implements IDataApi<string, Scenario | Auxiliar
 
   exportDataActual(dataSaved: Scenario | AuxiliaryFunction): void {
     try {
-      this.downloadData(dataSaved, dataSaved.name);
+      this.downloadData(dataSaved, dataSaved.name, "json");
     } catch (error) {
       console.error("Error exportando datos actuales:", error);
       throw error;

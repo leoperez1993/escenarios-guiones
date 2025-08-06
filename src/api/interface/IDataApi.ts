@@ -33,6 +33,16 @@ export interface IDataApi<K, T> {
   exportData(key: K, filename: string): void;
 
   /**
+   * Exporta los datos en texto plano asociados con una clave dada a un archivo.
+   *
+   * @param key - La clave cuyos datos asociados se exportarán.
+   * @param filename - El nombre del archivo al que se exportarán los datos.
+   * @throws Error si ocurre un problema al exportar los datos.
+  
+   */
+  exportDataPlainText(key: K, filename: string): void;
+
+  /**
    * Exporta los datos actualmente guardados.
    *
    * @param dataSaved - Los datos que se exportarán.
